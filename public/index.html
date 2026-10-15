@@ -1,0 +1,149 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Eventura · Event Management</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{color-scheme:dark;--bg:#07060f;--ink:#f5f5f7;--mute:#9a97b3;--line:rgba(255,255,255,.09);--v:#7c5cff;--m:#ff4fa3;--c:#22d3ee;--ease:cubic-bezier(.32,.72,0,1);
+--font:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text",Inter,"Segoe UI",sans-serif}
+*{box-sizing:border-box;margin:0}
+body{background:var(--bg);color:var(--ink);font:400 17px/1.47 var(--font);-webkit-font-smoothing:antialiased;letter-spacing:-.011em;min-height:100vh;overflow-x:hidden}
+.aurora{position:fixed;inset:0;overflow:hidden;pointer-events:none}
+.aurora i{position:absolute;width:55vw;height:55vw;border-radius:50%;filter:blur(120px);opacity:.34;animation:drift 22s ease-in-out infinite alternate}
+.aurora i:nth-child(1){background:var(--v);top:-22vw;left:-10vw}.aurora i:nth-child(2){background:var(--m);top:8vw;right:-22vw;animation-delay:-8s}
+.aurora i:nth-child(3){background:var(--c);bottom:-28vw;left:25vw;opacity:.22;animation-delay:-14s}
+@keyframes drift{to{transform:translate(8vw,6vw) scale(1.15)}}
+body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;background-image:radial-gradient(rgba(255,255,255,.08) 1px,transparent 1px);background-size:28px 28px;-webkit-mask-image:radial-gradient(ellipse at 50% 0,#000,transparent 70%);mask-image:radial-gradient(ellipse at 50% 0,#000,transparent 70%)}
+header{position:sticky;top:0;z-index:5;height:56px;display:flex;align-items:center;justify-content:space-between;gap:20px;padding:0 max(20px,calc(50% - 560px));background:rgba(7,6,15,.6);backdrop-filter:saturate(180%) blur(22px);-webkit-backdrop-filter:saturate(180%) blur(22px);border-bottom:1px solid var(--line)}
+.logo{font-weight:700;font-size:19px;letter-spacing:-.03em;white-space:nowrap}
+.logo i{display:inline-block;width:13px;height:13px;border-radius:4px;background:linear-gradient(135deg,var(--m),var(--v),var(--c));margin-right:10px;transform:rotate(45deg);box-shadow:0 0 18px var(--m)}
+nav{display:flex;gap:4px;overflow-x:auto}
+nav button{background:none;border:0;font:400 14px var(--font);color:var(--mute);padding:7px 14px;border-radius:980px;cursor:pointer;white-space:nowrap;transition:.3s var(--ease)}
+nav button:hover{color:#fff;background:rgba(255,255,255,.07)}nav button.on{background:linear-gradient(135deg,var(--v),var(--m));color:#fff;box-shadow:0 6px 24px -6px var(--m)}
+main{position:relative;z-index:1;max-width:1120px;margin:0 auto;padding:64px 20px 96px}
+.rv{animation:up .9s var(--ease) both;animation-delay:calc(var(--i,0)*70ms)}@keyframes up{from{opacity:0;transform:translateY(32px)}}
+h1{font:700 clamp(38px,6vw,72px)/1.04 var(--font);letter-spacing:-.04em}
+h1 em{font-style:normal;background:linear-gradient(90deg,var(--c),var(--v),var(--m));-webkit-background-clip:text;background-clip:text;color:transparent}
+h2{font:700 28px/1.15 var(--font);letter-spacing:-.03em;margin:60px 0 20px}
+.sub{color:var(--mute);font-size:21px;margin:16px 0 42px;max-width:560px;letter-spacing:-.015em}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}
+.card{position:relative;overflow:hidden;background:linear-gradient(180deg,rgba(255,255,255,.075),rgba(255,255,255,.025));border:1px solid var(--line);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-radius:24px;padding:24px;transition:transform .5s var(--ease),box-shadow .5s var(--ease),border-color .4s}
+.card::after{content:'';position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .4s;background:radial-gradient(340px circle at var(--x,50%) var(--y,50%),rgba(255,255,255,.11),transparent 60%)}
+.card:hover::after{opacity:1}
+.ev::before{content:'';position:absolute;left:0;right:0;top:0;height:3px;background:linear-gradient(90deg,var(--c1),var(--c2))}
+.ev:hover{transform:translateY(-6px);box-shadow:0 24px 60px -24px var(--c1);border-color:rgba(255,255,255,.18)}
+.stat b{display:block;font:700 44px/1.1 var(--font);letter-spacing:-.04em;background:linear-gradient(135deg,#fff 30%,var(--g,#fff));-webkit-background-clip:text;background-clip:text;color:transparent}
+.stat span{color:var(--mute);font-size:15px}.stat:nth-child(1){--g:var(--v)}.stat:nth-child(2){--g:var(--c)}.stat:nth-child(3){--g:var(--m)}.stat:nth-child(4){--g:#fbbf24}
+.top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.date{width:56px;padding:9px 0;border-radius:14px;background:linear-gradient(135deg,var(--c1),var(--c2));color:#fff;text-align:center;line-height:1;font-weight:700;font-size:24px}
+.date small{display:block;font-size:11px;opacity:.9;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;font-weight:600}
+.ev h3{font:600 21px/1.2 var(--font);letter-spacing:-.02em;margin:16px 0 4px}.ev p{color:var(--mute);font-size:14px}
+.meter{height:6px;background:rgba(255,255,255,.1);border-radius:9px;margin:16px 0 8px;overflow:hidden}
+.meter i{display:block;height:100%;background:linear-gradient(90deg,var(--c1,var(--v)),var(--c2,var(--m)));border-radius:9px;width:var(--w);animation:grow 1.2s var(--ease) both .3s}@keyframes grow{from{width:0}}
+.pill{display:inline-block;font-size:12px;font-weight:600;padding:3px 11px;border-radius:980px;background:rgba(255,255,255,.1)}
+.g{background:rgba(52,211,153,.15);color:#6ee7b7}.a{background:rgba(251,191,36,.15);color:#fcd34d}.r{background:rgba(251,113,133,.16);color:#fda4af}
+.acts{display:flex;gap:6px;margin-top:16px}
+.btn{background:linear-gradient(135deg,var(--v),var(--m));color:#fff;border:0;border-radius:980px;padding:10px 22px;font:500 15px var(--font);cursor:pointer;transition:.35s var(--ease);box-shadow:0 8px 28px -8px var(--m)}
+.btn:hover{transform:scale(1.05);box-shadow:0 12px 36px -8px var(--m)}.btn:active{transform:scale(.97)}
+.btn.s{background:rgba(255,255,255,.08);box-shadow:none;padding:7px 14px;font-size:13px;border:1px solid var(--line)}.btn.s:hover{background:rgba(255,255,255,.15);box-shadow:none}.btn.d{color:#fda4af}
+.bar{display:flex;justify-content:space-between;align-items:end;margin-bottom:28px;gap:16px;flex-wrap:wrap}
+.wrap{overflow-x:auto;padding:8px 12px}table{width:100%;border-collapse:collapse;font-size:15px}
+th{text-align:left;font-weight:500;font-size:13px;color:var(--mute);padding:14px 12px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:14px 12px;border-bottom:1px solid rgba(255,255,255,.05);white-space:nowrap}tr:last-child td{border:0}tbody tr{transition:background .2s}tbody tr:hover{background:rgba(255,255,255,.04)}
+.chart{display:grid;gap:16px}.chart div{display:grid;grid-template-columns:160px 1fr 100px;gap:14px;align-items:center;font-size:14px}.chart .meter{margin:0;height:10px}.chart b{text-align:right}
+.empty{padding:40px;text-align:center;color:var(--mute)}
+.modal{position:fixed;inset:0;background:rgba(4,3,10,.65);backdrop-filter:blur(10px);display:grid;place-items:center;z-index:10;animation:fade .3s;padding:16px}
+.sheet{background:#120f22;border:1px solid var(--line);border-radius:28px;padding:32px;width:min(520px,100%);max-height:90vh;overflow:auto;animation:sheet .6s var(--ease);box-shadow:0 40px 120px -20px rgba(124,92,255,.35)}
+@keyframes fade{from{opacity:0}}@keyframes sheet{from{opacity:0;transform:translateY(60px) scale(.96)}}
+.sheet h2{margin:0 0 6px;font-size:26px}label{display:block;color:var(--mute);font-size:13px;margin:16px 0 6px}
+input,select,textarea{width:100%;background:rgba(255,255,255,.06);color:var(--ink);border:1px solid var(--line);border-radius:12px;padding:12px 14px;font:16px var(--font);transition:.2s}
+select option{background:#120f22;color:#fff}
+input:focus,select:focus,textarea:focus{outline:0;border-color:var(--v);box-shadow:0 0 0 4px rgba(124,92,255,.25)}
+.row{display:flex;gap:10px;justify-content:flex-end;margin-top:26px}
+h4{font:600 17px var(--font);margin:24px 0 10px}
+.chip{display:inline-flex;gap:8px;align-items:center;background:rgba(255,255,255,.08);border-radius:980px;padding:5px 6px 5px 14px;margin:0 6px 8px 0;font-size:14px;animation:sheet .4s var(--ease)}
+.chip small{color:var(--mute)}.chip button{background:rgba(255,255,255,.15);color:#fff;border:0;border-radius:50%;width:22px;height:22px;cursor:pointer}.chip button:hover{background:#f43f5e}
+#toast{position:fixed;bottom:28px;left:50%;transform:translate(-50%,120px);background:#241f3d;border:1px solid var(--line);color:#fff;padding:12px 22px;border-radius:980px;font-size:15px;transition:.5s var(--ease);z-index:20}
+#toast.show{transform:translate(-50%,0)}#toast.err{background:#be123c}
+button:focus-visible{outline:3px solid rgba(124,92,255,.6);outline-offset:2px}
+@media(max-width:700px){.chart div{grid-template-columns:90px 1fr 80px}.logo{font-size:16px}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style></head><body>
+<div class="aurora"><i></i><i></i><i></i></div><header><div class="logo"><i></i>Eventura</div><nav id="nav"></nav></header><main id="main"></main><div id="toast"></div>
+<script>
+const $=s=>document.querySelector(s);
+const api=(p,o={})=>fetch('/api/'+p,{...o,headers:{'Content-Type':'application/json'},body:o.body&&JSON.stringify(o.body)}).then(async r=>{const d=await r.json();if(!r.ok)throw new Error(d.error);return d});
+const toast=(m,e)=>{const t=$('#toast');t.textContent=m;t.className='show'+(e?' err':'');clearTimeout(t.x);t.x=setTimeout(()=>t.className='',2600)};
+const money=n=>'₹'+Number(n||0).toLocaleString('en-IN');
+const dt=(v,o={day:'numeric',month:'short',year:'numeric'})=>v?new Date(v+'T00:00').toLocaleDateString('en-IN',o):'Date TBD';
+const PAL={Concert:['#ff4fa3','#7c5cff'],Wedding:['#ffb020','#ff4fa3'],Conference:['#22d3ee','#3b82f6'],Corporate:['#34d399','#22d3ee'],Birthday:['#f472b6','#fb923c'],Festival:['#a3e635','#22d3ee']},pal=n=>PAL[n]||['#7c5cff','#22d3ee'];
+const pill=v=>`<span class="pill ${{Confirmed:'g',Completed:'g',Paid:'g',Planning:'a',Pending:'a',Partial:'a',Cancelled:'r'}[v]||''}">${v}</span>`;
+// field = [column,label,kind,extra]  kinds: text number date email textarea ref(table,labelCol) opt(list)
+const V={
+ event:{t:'Events',one:'event',pk:'event_id',f:[['event_name','Event name'],['client_name','Client'],['type_id','Type','ref',['event_type','type_name']],['venue','Venue'],['event_date','Date','date'],['max_capacity','Capacity','number'],['ticket_price','Ticket price (₹)','number'],['performer_name','Performer / host'],['status','Status','opt',['Planning','Confirmed','Completed','Cancelled']],['description','Notes','textarea']]},
+ guest:{t:'Guests',one:'guest',pk:'guest_id',f:[['guest_name','Name'],['email','Email','email'],['phone','Phone'],['ticket_type','Ticket','opt',['General','VIP','Student']]]},
+ services:{t:'Vendors',one:'vendor',pk:'service_id',f:[['service_type','Category','opt',['Food Caterer','Furniture','Decorator','Sponsor']],['provider_name','Provider'],['contact_phone','Phone'],['cost','Cost (₹)','number']]},
+ finance:{t:'Finance',one:'budget',pk:'budget_id',calc:['profit','Profit (₹)'],f:[['event_id','Event','ref',['event','event_name']],['manager_name','Account manager'],['budget','Budget (₹)','number'],['revenue','Revenue (₹)','number'],['expenses','Expenses (₹)','number'],['payment_status','Payment','opt',['Pending','Partial','Paid']]]},
+ event_type:{t:'Categories',one:'category',pk:'type_id',f:[['type_name','Category name']]}
+};
+const C={},load=async t=>C[t]=await api(t);
+const lab=(tb,col,id)=>(C[tb].find(r=>r[V[tb].pk]==id)||{})[col]||'—';
+const cell=(f,r)=>{const[k,l,t,x]=f,v=r[k];if(v==null||v==='')return'—';
+ if(t==='ref')return lab(x[0],x[1],v);if(t==='date')return dt(v);
+ if(k==='status'||k==='payment_status')return pill(v);if(/₹/.test(l))return money(v);return v};
+function nav(cur){$('#nav').innerHTML=[['dash','Overview'],...Object.entries(V).map(([k,v])=>[k,v.t])].map(([k,l])=>`<button data-v="${k}" class="${k===cur?'on':''}">${l}</button>`).join('');
+ document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>show(b.dataset.v))}
+const card=(e,i)=>{const p=e.max_capacity?Math.min(100,Math.round(e.guests/e.max_capacity*100)):0;
+ return `<div class="card ev rv" style="--i:${i};--c1:${pal(e.type_name)[0]};--c2:${pal(e.type_name)[1]}"><div class="top"><div><div class="date"><small>${dt(e.event_date,{month:'short'})}</small>${e.event_date?+e.event_date.slice(8):'–'}</div></div>${pill(e.status)}</div>
+ <h3>${e.event_name}</h3><p>${e.type_name||'Uncategorised'} · ${e.venue}</p><p>${e.client_name||'No client'}${e.performer_name?' · '+e.performer_name:''}</p>
+ <div class="meter"><i style="--w:${p}%"></i></div><p>${e.guests} of ${e.max_capacity||'—'} guests · ${e.services} vendors · ${e.ticket_price>0?money(e.ticket_price):'Invite only'}</p>
+ <div class="acts"><button class="btn s" data-m="${e.event_id}">Manage</button><button class="btn s" data-e="${e.event_id}">Edit</button><button class="btn s d" data-d="${e.event_id}">Delete</button></div></div>`};
+function wire(v){const c=V[v];
+ document.querySelectorAll('[data-e]').forEach(b=>b.onclick=()=>form(v,C[v].find(r=>r[c.pk]==b.dataset.e)));
+ document.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>manage(C.event.find(r=>r.event_id==b.dataset.m)));
+ document.querySelectorAll('[data-d]').forEach(b=>b.onclick=async()=>{if(!confirm('Delete this '+c.one+'?'))return;
+  try{await api(`${v}/${b.dataset.d}`,{method:'DELETE'});toast('Deleted');show(v)}catch(e){toast(e.message,1)}})}
+async function dash(){
+ const[s,ov]=await Promise.all([api('stats'),api('overview'),load('event')]);
+ const up=ov.filter(e=>!['Completed','Cancelled'].includes(e.status)).slice(0,3),mx=Math.max(...ov.map(e=>+e.profit||0),1);
+ $('#main').innerHTML=`<div class="rv"><h1>Every event.<br><em>Perfectly in sync.</em></h1><p class="sub">Plan events, manage guest lists, book vendors and track every rupee, all in one place.</p></div>
+ <div class="grid">${[['events','Events'],['guests','Guests registered'],['services','Vendors'],['profit','Total profit']].map(([k,l],i)=>`<div class="card stat rv" style="--i:${i+2}"><b data-n="${s[k]}" data-m="${k==='profit'?1:0}">0</b><span>${l}</span></div>`).join('')}</div>
+ <h2 class="rv" style="--i:6">Coming up</h2><div class="grid">${up.map(card).join('')||'<p class="empty">No upcoming events.</p>'}</div>
+ <h2 class="rv" style="--i:7">Profit by event</h2><div class="card chart rv" style="--i:8">${ov.map(e=>`<div><span>${e.event_name}</span><span class="meter" style="--c1:${pal(e.type_name)[0]};--c2:${pal(e.type_name)[1]}"><i style="--w:${Math.max(0,(+e.profit||0)/mx*100)}%"></i></span><b>${money(e.profit)}</b></div>`).join('')}</div>`;
+ document.querySelectorAll('[data-n]').forEach(el=>{const end=+el.dataset.n,t0=performance.now(),m=el.dataset.m==='1';
+  (function tick(t){const p=Math.min((t-t0)/1400,1),v=Math.round(end*(1-Math.pow(1-p,4)));el.textContent=m?money(v):v.toLocaleString('en-IN');if(p<1)requestAnimationFrame(tick)})(t0)});
+ C.event=ov;wire('event')}
+async function show(v){nav(v);scrollTo({top:0});if(v==='dash')return dash();
+ const c=V[v];await Promise.all(['event_type','event',v].map(load));
+ const head=`<div class="bar rv"><div><h1 style="font-size:clamp(34px,5vw,56px)">${c.t}</h1></div><button class="btn" id="add">Add ${c.one}</button></div>`;
+ let body;
+ if(v==='event'){const ov=await api('overview');C.event=ov;body=`<div class="grid">${ov.map(card).join('')}</div>`}
+ else{let extra='';if(v==='finance'){const S=k=>C.finance.reduce((a,r)=>a+(+r[k]||0),0);
+   extra=`<div class="grid" style="margin-bottom:16px">${[['Total budget',S('budget')],['Revenue',S('revenue')],['Expenses',S('expenses')],['Profit',S('profit')]].map(([l,n],i)=>`<div class="card stat rv" style="--i:${i+1}"><b>${money(n)}</b><span>${l}</span></div>`).join('')}</div>`}
+  const cols=[...c.f.filter(f=>f[2]!=='textarea')];
+  body=extra+`<div class="card wrap rv" style="--i:3"><table><thead><tr>${cols.map(f=>`<th>${f[1]}</th>`).join('')}${c.calc?`<th>${c.calc[1]}</th>`:''}<th></th></tr></thead><tbody>
+  ${C[v].map(r=>`<tr>${cols.map(f=>`<td>${cell(f,r)}</td>`).join('')}${c.calc?`<td><b>${money(r[c.calc[0]])}</b></td>`:''}<td><button class="btn s" data-e="${r[c.pk]}">Edit</button> <button class="btn s d" data-d="${r[c.pk]}">Delete</button></td></tr>`).join('')}</tbody></table>
+  ${C[v].length?'':`<div class="empty">Nothing here yet. Add the first ${c.one}.</div>`}</div>`}
+ $('#main').innerHTML=head+body;$('#add').onclick=()=>form(v);wire(v)}
+function form(v,row){const c=V[v],m=document.createElement('div');m.className='modal';
+ const input=f=>{const[col,l,k,x]=f,val=row?row[col]??'':'';
+  if(k==='ref')return`<select name="${col}"><option value="">None</option>${C[x[0]].map(r=>`<option value="${r[V[x[0]].pk]}" ${r[V[x[0]].pk]==val?'selected':''}>${r[x[1]]}</option>`).join('')}</select>`;
+  if(k==='opt')return`<select name="${col}">${x.map(o=>`<option ${o==val?'selected':''}>${o}</option>`).join('')}</select>`;
+  if(k==='textarea')return`<textarea name="${col}" rows="3">${val}</textarea>`;
+  return`<input name="${col}" type="${k||'text'}" step="any" value="${val}" ${col.endsWith('name')?'required':''}>`};
+ m.innerHTML=`<form class="sheet"><h2>${row?'Edit':'New'} ${c.one}</h2>${c.f.map(f=>`<label>${f[1]}</label>${input(f)}`).join('')}<div class="row"><button type="button" class="btn s" id="x">Cancel</button><button class="btn">Save</button></div></form>`;
+ document.body.append(m);m.onclick=e=>e.target===m&&m.remove();$('#x').onclick=()=>m.remove();
+ m.querySelector('form').onsubmit=async e=>{e.preventDefault();
+  try{await api(row?`${v}/${row[c.pk]}`:v,{method:row?'PUT':'POST',body:Object.fromEntries(new FormData(e.target))});m.remove();toast('Saved');show(v)}catch(err){toast(err.message,1)}}}
+async function manage(ev){await Promise.all([load('guest'),load('services')]);
+ const m=document.createElement('div');m.className='modal';document.body.append(m);m.onclick=e=>e.target===m&&m.remove();
+ const draw=async()=>{const L=await api(`event/${ev.event_id}/links`);
+  const sec=(k,title,pool,id,nm,w)=>`<h4>${title}</h4>${L[k].map(x=>`<span class="chip">${x.label} <small>${x.extra||''}</small><button data-k="${k}" data-r="${x.id}" aria-label="Remove">×</button></span>`).join('')||'<p class="sub" style="font-size:15px;margin:0 0 10px">None yet.</p>'}
+   <select data-add="${k}"><option value="">Add ${w}…</option>${pool.filter(p=>!L[k].some(x=>x.id==p[id])).map(p=>`<option value="${p[id]}">${p[nm]}</option>`).join('')}</select>`;
+  m.innerHTML=`<div class="sheet"><h2>${ev.event_name}</h2><p class="sub" style="font-size:16px;margin:6px 0 0">${ev.venue} · ${dt(ev.event_date)}</p>
+  ${sec('guests','Guest list',C.guest,'guest_id','guest_name','a guest')}${sec('services','Vendors',C.services,'service_id','provider_name','a vendor')}
+  <div class="row"><button class="btn" id="x">Done</button></div></div>`;
+  $('#x').onclick=()=>{m.remove();show('event')};
+  m.querySelectorAll('[data-add]').forEach(s=>s.onchange=async()=>{if(s.value){await api(`event/${ev.event_id}/${s.dataset.add}`,{method:'POST',body:{id:s.value}});draw()}});
+  m.querySelectorAll('[data-r]').forEach(b=>b.onclick=async()=>{await api(`event/${ev.event_id}/${b.dataset.k}/${b.dataset.r}`,{method:'DELETE'});draw()})};draw()}
+addEventListener('mousemove',e=>{const c=e.target.closest&&e.target.closest('.card');if(c){const r=c.getBoundingClientRect();c.style.setProperty('--x',e.clientX-r.left+'px');c.style.setProperty('--y',e.clientY-r.top+'px')}});
+const _show=show;show=v=>_show(v).catch(e=>{$('#main').innerHTML=`<h1>Can't reach the database</h1><p class="sub">${e.message}</p><p>Open <b>http://localhost:3000</b>, check the password in <b>.env</b>, run <b>upgrade.sql</b> in pgAdmin, and check the terminal running npm start.</p>`});
+show('dash');
+</script></body></html>
