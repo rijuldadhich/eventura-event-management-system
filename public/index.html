@@ -157,10 +157,12 @@ function setAuth(me){ADMIN=me.admin;OPEN=me.open;document.body.classList.toggle(
  const b=$('#auth');b.style.display=OPEN?'none':'';b.textContent=ADMIN?'Log out':'Admin login';
  b.onclick=ADMIN?()=>{TOKEN='';localStorage.removeItem('tok');setAuth({admin:false,open:false});toast('Logged out');show(CUR)}:login}
 function login(){const m=document.createElement('div');m.className='modal';
- m.innerHTML=`<form class="sheet"><h2>Admin login</h2><p class="sub" style="font-size:15px;margin:6px 0 0">Visitors can browse everything. Log in to add, edit or delete.</p><label>Password</label><input type="password" name="pw" autofocus required><div class="row"><button type="button" class="btn s" id="x">Cancel</button><button class="btn">Log in</button></div></form>`;
+ m.innerHTML=`<div class="sheet"><h2>Admin login</h2><p class="sub" style="font-size:15px;margin:6px 0 0">Visitors can browse everything. Log in to add, edit or delete.</p><label>Password</label><input type="password" id="pw" autocomplete="off"><p id="lerr" style="color:#fda4af;font-size:14px;margin-top:10px;min-height:20px"></p><div class="row"><button type="button" class="btn s" id="x">Cancel</button><button type="button" class="btn" id="go">Log in</button></div></div>`;
  document.body.append(m);m.onclick=e=>e.target===m&&m.remove();$('#x').onclick=()=>m.remove();
- m.querySelector('form').onsubmit=async e=>{e.preventDefault();
-  try{const r=await api('login',{method:'POST',body:{password:e.target.pw.value}});TOKEN=r.token;localStorage.setItem('tok',TOKEN);m.remove();setAuth({admin:true,open:false});toast('Welcome back');show(CUR)}catch(err){toast(err.message,1)}}}
+ const go=async()=>{const pw=$('#pw').value;if(!pw){$('#lerr').textContent='Password box is empty. Please type it in.';return}$('#lerr').textContent='Checking…';
+  try{const r=await api('login',{method:'POST',body:{password:pw}});TOKEN=r.token;localStorage.setItem('tok',TOKEN);m.remove();setAuth({admin:true,open:false});toast('Welcome back');show(CUR)}
+  catch(err){$('#lerr').textContent=err.message}};
+ $('#go').onclick=go;$('#pw').onkeydown=e=>{if(e.key==='Enter')go()};$('#pw').focus()}
 function finChart(){
  const mx=Math.max(...C.finance.map(r=>Math.max(+r.revenue||0,+r.expenses||0)),1);
  return `<div class="card rv" style="--i:5;margin-bottom:16px"><h4 style="margin:0">Revenue vs expenses</h4>
