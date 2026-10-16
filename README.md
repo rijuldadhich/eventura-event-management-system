@@ -1,4 +1,5 @@
 Eventura: Event Management System
+
 DBMS lab project. Node.js + Express backend, PostgreSQL database, vanilla JS frontend.
 Live demo: https://eventura-event-management-system.onrender.com/ (free hosting, so the first load may take about a minute). Visitors get read-only access; editing needs the admin login.
 Run locally
