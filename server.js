@@ -23,6 +23,30 @@ const J = { guests: ['guest_list', 'guest', 'guest_id'], services: ['hires_servi
 const wrap = fn => (req, res) => fn(req, res).catch(e => res.status(400).json({ error: e.detail || e.message || e.code || String(e) }));
 const clean = (cols, body) => cols.map(c => (body[c] === '' || body[c] === undefined ? null : body[c]));
 
+const crypto = require('crypto');
+// ---- Admin login: visitors can read (GET); writes need a token. If ADMIN_PASSWORD is unset (local use) everything is open.
+app.set('trust proxy', 1);
+const ADMIN_PW = process.env.ADMIN_PASSWORD || '';
+const sign = exp => crypto.createHmac('sha256', ADMIN_PW).update(String(exp)).digest('hex');
+const mkToken = () => { const exp = Date.now() + 12 * 3600e3; return exp + '.' + sign(exp); };
+const okToken = t => { if (!t) return false; const [exp, sig] = t.split('.');
+  if (!sig || Date.now() > +exp) return false;
+  const a = Buffer.from(sig), b = Buffer.from(sign(exp)); return a.length === b.length && crypto.timingSafeEqual(a, b); };
+const authed = req => okToken((req.headers.authorization || '').replace('Bearer ', ''));
+const tries = {};
+app.use('/api', (req, res, next) => {
+  if (!ADMIN_PW || req.method === 'GET' || req.path === '/login') return next();
+  authed(req) ? next() : res.status(401).json({ error: 'Admin login required' });
+});
+app.get('/api/me', (req, res) => res.json({ open: !ADMIN_PW, admin: !ADMIN_PW || authed(req) }));
+app.post('/api/login', (req, res) => {
+  const t = tries[req.ip] = (tries[req.ip] || []).filter(x => Date.now() - x < 9e5);
+  if (t.length >= 8) return res.status(429).json({ error: 'Too many attempts. Try again in 15 minutes.' });
+  const a = Buffer.from(String(req.body.password || '')), b = Buffer.from(ADMIN_PW);
+  if (ADMIN_PW && a.length === b.length && crypto.timingSafeEqual(a, b)) return res.json({ token: mkToken() });
+  t.push(Date.now()); res.status(401).json({ error: 'Wrong password' });
+});
+
 app.get('/api/overview', wrap(async (req, res) => {
   res.json((await pool.query(`SELECT e.*, t.type_name,
     (SELECT COUNT(*) FROM guest_list l WHERE l.event_id=e.event_id)::int guests,
