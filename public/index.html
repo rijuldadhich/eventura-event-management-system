@@ -70,6 +70,7 @@ body.ro #add,body.ro [data-e],body.ro [data-d],body.ro [data-add],body.ro .chip 
 .fch{display:grid;gap:18px}.fch>div{display:grid;grid-template-columns:150px 1fr 100px;gap:14px;align-items:center;font-size:14px}.fch .meter{display:block;margin:4px 0;height:8px}.fch b{text-align:right}
 .lg{display:flex;flex-wrap:wrap;gap:16px;font-size:12px;color:var(--mute);margin:6px 0 18px}.lg i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px}
 @media(max-width:700px){.fch>div{grid-template-columns:90px 1fr 80px}}
+.ferr{color:#fda4af;font-size:14px;margin-top:14px}.ferr:empty{display:none}
 button:focus-visible{outline:3px solid rgba(124,92,255,.6);outline-offset:2px}
 @media(max-width:700px){.chart div{grid-template-columns:90px 1fr 80px}.logo{font-size:16px}}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
@@ -78,7 +79,7 @@ button:focus-visible{outline:3px solid rgba(124,92,255,.6);outline-offset:2px}
 <script>
 const $=s=>document.querySelector(s);
 let TOKEN=localStorage.getItem('tok')||'',ADMIN=false,OPEN=false,CUR='dash';
-const api=(p,o={})=>fetch('/api/'+p,{...o,headers:{'Content-Type':'application/json',...(TOKEN?{Authorization:'Bearer '+TOKEN}:{})},body:o.body&&JSON.stringify(o.body)}).then(async r=>{const d=await r.json();if(r.status===401&&p!=='login'){TOKEN='';localStorage.removeItem('tok');setAuth({admin:false,open:false})}if(!r.ok)throw new Error(d.error);return d});
+const api=(p,o={})=>fetch('/api/'+p,{...o,headers:{'Content-Type':'application/json',...(TOKEN?{Authorization:'Bearer '+TOKEN}:{})},body:o.body&&JSON.stringify(o.body)}).then(async r=>{const d=await r.json().catch(()=>({error:'Server not responding (it may be waking up). Wait a minute and try again.'}));if(r.status===401&&p!=='login'){TOKEN='';localStorage.removeItem('tok');setAuth({admin:false,open:false})}if(!r.ok)throw new Error(d.error);return d});
 const toast=(m,e)=>{const t=$('#toast');t.textContent=m;t.className='show'+(e?' err':'');clearTimeout(t.x);t.x=setTimeout(()=>t.className='',2600)};
 const money=n=>'₹'+Number(n||0).toLocaleString('en-IN');
 const dt=(v,o={day:'numeric',month:'short',year:'numeric'})=>v?new Date(v+'T00:00').toLocaleDateString('en-IN',o):'Date TBD';
@@ -92,6 +93,7 @@ const V={
  finance:{t:'Finance',one:'budget',pk:'budget_id',calc:['profit','Profit (₹)'],f:[['event_id','Event','ref',['event','event_name']],['manager_name','Account manager'],['budget','Budget (₹)','number'],['revenue','Revenue (₹)','number'],['expenses','Expenses (₹)','number'],['payment_status','Payment','opt',['Pending','Partial','Paid']]]},
  event_type:{t:'Categories',one:'category',pk:'type_id',f:[['type_name','Category name']]}
 };
+const REQ=['event_name','venue','guest_name','provider_name','type_name'];
 const C={},load=async t=>C[t]=await api(t);
 const lab=(tb,col,id)=>(C[tb].find(r=>r[V[tb].pk]==id)||{})[col]||'—';
 const cell=(f,r)=>{const[k,l,t,x]=f,v=r[k];if(v==null||v==='')return'—';
@@ -136,13 +138,14 @@ function form(v,row){const c=V[v],m=document.createElement('div');m.className='m
   if(k==='ref')return`<select name="${col}"><option value="">None</option>${C[x[0]].map(r=>`<option value="${r[V[x[0]].pk]}" ${r[V[x[0]].pk]==val?'selected':''}>${r[x[1]]}</option>`).join('')}</select>`;
   if(k==='opt')return`<select name="${col}">${x.map(o=>`<option ${o==val?'selected':''}>${o}</option>`).join('')}</select>`;
   if(k==='textarea')return`<textarea name="${col}" rows="3">${val}</textarea>`;
-  return`<input name="${col}" type="${k||'text'}" step="any" value="${val}" ${col.endsWith('name')?'required':''}>`};
- m.innerHTML=`<form class="sheet"><h2>${row?'Edit':'New'} ${c.one}</h2>${c.f.map(f=>`<label>${f[1]}</label>${input(f)}`).join('')}<div class="row"><button type="button" class="btn s" id="x">Cancel</button><button class="btn">Save</button></div></form>`;
- document.body.append(m);m.onclick=e=>e.target===m&&m.remove();$('#x').onclick=()=>m.remove();
- m.querySelector('form').onsubmit=async e=>{e.preventDefault();
-  try{await api(row?`${v}/${row[c.pk]}`:v,{method:row?'PUT':'POST',body:Object.fromEntries(new FormData(e.target))});m.remove();toast('Saved');show(v)}catch(err){toast(err.message,1)}}}
+  return`<input name="${col}" type="${k||'text'}" step="any" value="${val}" ${REQ.includes(col)?'required':''}>`};
+ m.innerHTML=`<form class="sheet"><h2>${row?'Edit':'New'} ${c.one}</h2>${c.f.map(f=>`<label>${f[1]}</label>${input(f)}`).join('')}<p class="ferr"></p><div class="row"><button type="button" class="btn s" id="x">Cancel</button><button class="btn">Save</button></div></form>`;
+ document.body.append(m);m.onclick=e=>{if(e.target===m)m.remove()};$('#x').onclick=()=>m.remove();
+ m.querySelector('form').onsubmit=async e=>{e.preventDefault();const f=e.target,btn=f.querySelector('.row .btn:not(.s)'),er=f.querySelector('.ferr');er.textContent='';btn.disabled=true;btn.textContent='Saving…';
+  try{await api(row?`${v}/${row[c.pk]}`:v,{method:row?'PUT':'POST',body:Object.fromEntries(new FormData(f))});m.remove();toast('Saved');show(v)}
+  catch(err){er.textContent='Could not save: '+err.message;toast(err.message,1);btn.disabled=false;btn.textContent='Save'}}}
 async function manage(ev){await Promise.all([load('guest'),load('services')]);
- const m=document.createElement('div');m.className='modal';document.body.append(m);m.onclick=e=>e.target===m&&m.remove();
+ const m=document.createElement('div');m.className='modal';document.body.append(m);m.onclick=e=>{if(e.target===m)m.remove()};
  const draw=async()=>{const L=await api(`event/${ev.event_id}/links`);
   const sec=(k,title,pool,id,nm,w)=>`<h4>${title}</h4>${L[k].map(x=>`<span class="chip">${x.label} <small>${x.extra||''}</small><button data-k="${k}" data-r="${x.id}" aria-label="Remove">×</button></span>`).join('')||'<p class="sub" style="font-size:15px;margin:0 0 10px">None yet.</p>'}
    <select data-add="${k}"><option value="">Add ${w}…</option>${pool.filter(p=>!L[k].some(x=>x.id==p[id])).map(p=>`<option value="${p[id]}">${p[nm]}</option>`).join('')}</select>`;
@@ -157,12 +160,10 @@ function setAuth(me){ADMIN=me.admin;OPEN=me.open;document.body.classList.toggle(
  const b=$('#auth');b.style.display=OPEN?'none':'';b.textContent=ADMIN?'Log out':'Admin login';
  b.onclick=ADMIN?()=>{TOKEN='';localStorage.removeItem('tok');setAuth({admin:false,open:false});toast('Logged out');show(CUR)}:login}
 function login(){const m=document.createElement('div');m.className='modal';
- m.innerHTML=`<div class="sheet"><h2>Admin login</h2><p class="sub" style="font-size:15px;margin:6px 0 0">Visitors can browse everything. Log in to add, edit or delete.</p><label>Password</label><input type="password" id="pw" autocomplete="off"><p id="lerr" style="color:#fda4af;font-size:14px;margin-top:10px;min-height:20px"></p><div class="row"><button type="button" class="btn s" id="x">Cancel</button><button type="button" class="btn" id="go">Log in</button></div></div>`;
- document.body.append(m);m.onclick=e=>e.target===m&&m.remove();$('#x').onclick=()=>m.remove();
- const go=async()=>{const pw=$('#pw').value;if(!pw){$('#lerr').textContent='Password box is empty. Please type it in.';return}$('#lerr').textContent='Checking…';
-  try{const r=await api('login',{method:'POST',body:{password:pw}});TOKEN=r.token;localStorage.setItem('tok',TOKEN);m.remove();setAuth({admin:true,open:false});toast('Welcome back');show(CUR)}
-  catch(err){$('#lerr').textContent=err.message}};
- $('#go').onclick=go;$('#pw').onkeydown=e=>{if(e.key==='Enter')go()};$('#pw').focus()}
+ m.innerHTML=`<form class="sheet"><h2>Admin login</h2><p class="sub" style="font-size:15px;margin:6px 0 0">Visitors can browse everything. Log in to add, edit or delete.</p><label>Password</label><input type="password" name="pw" autofocus required><div class="row"><button type="button" class="btn s" id="x">Cancel</button><button class="btn">Log in</button></div></form>`;
+ document.body.append(m);m.onclick=e=>{if(e.target===m)m.remove()};$('#x').onclick=()=>m.remove();
+ m.querySelector('form').onsubmit=async e=>{e.preventDefault();
+  try{const r=await api('login',{method:'POST',body:{password:e.target.pw.value}});TOKEN=r.token;localStorage.setItem('tok',TOKEN);m.remove();setAuth({admin:true,open:false});toast('Welcome back');show(CUR)}catch(err){toast(err.message,1)}}}
 function finChart(){
  const mx=Math.max(...C.finance.map(r=>Math.max(+r.revenue||0,+r.expenses||0)),1);
  return `<div class="card rv" style="--i:5;margin-bottom:16px"><h4 style="margin:0">Revenue vs expenses</h4>
